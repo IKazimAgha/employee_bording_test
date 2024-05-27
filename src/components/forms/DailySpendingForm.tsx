@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {DailySpendingFormProps} from "../../types/PagesTypes"
 import {InputStyle} from "../../constants/customInputStyles"
+import { isNotEmpty } from "../../constants/functionalLogics";
 
 const formDefaultValues = {
     speningLimit: 0,
   };
 
-const DailySpendingForm: React.FC<DailySpendingFormProps> = ({ onNext, onPrevious }) => {
+const DailySpendingForm: React.FC<DailySpendingFormProps> = ({ onNext, onPrevious, data }) => {
     const Schema = yup.object({
         speningLimit: yup.number()
         .positive('Daily spending limit must be a positive number')
@@ -35,6 +36,14 @@ const DailySpendingForm: React.FC<DailySpendingFormProps> = ({ onNext, onPreviou
     const onSubmit = (data: any) => {
       onNext({...data})
     }
+
+    useEffect(() => {
+      if(isNotEmpty(data)){
+        const {speningLimit} = data;
+        setValue("speningLimit", speningLimit)
+      }
+    }, [data])
+
     return (
         <div className="mx-auto p-6  shadow rounded-lg" >
         <h2 className="text-2xl font-semibold mb-6 bg-[#1B365D] text-[#E1EED6]">Step 4: Daily Spending Limit</h2>

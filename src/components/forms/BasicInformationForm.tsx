@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import {BasiInformationProps} from "../../types/PagesTypes"
-import { InputStyle } from "../../constants/customInputStyles";
+import { InputStyle, picturePreviewCSS } from "../../constants/customInputStyles";
+import { isNotEmpty } from "../../constants/functionalLogics"
 
 const formDefaultValues = {
     firstName: "",
@@ -11,8 +12,7 @@ const formDefaultValues = {
     employeePicture: {}
   };
 
-const BasicInformationForm : React.FC<BasiInformationProps> = ({ onNext }) =>{
-
+const BasicInformationForm : React.FC<BasiInformationProps> = ({ onNext, data }) =>{
     const [previewPicture, setPreviewPicture] = useState<any>({})
     const [showPicture, setshowPicture] = useState<boolean>(false)
 
@@ -23,20 +23,28 @@ const BasicInformationForm : React.FC<BasiInformationProps> = ({ onNext }) =>{
       });
 
     const {
-        register,
         handleSubmit,
         setValue,
-        setError,
-        reset,
         control,
-        watch,
-        getValues,
         formState: { errors },
       } = useForm({
         resolver: yupResolver(Schema),
         mode: "onChange",
         defaultValues: formDefaultValues,
       });
+
+    useEffect(() => {
+      if(isNotEmpty(data)){
+        const {firstName, lastName, photo} = data;
+        setValue("firstName", firstName);
+        setValue("lastName", lastName);
+        setValue("employeePicture", photo);
+        if(isNotEmpty(photo)){
+          setshowPicture(true)
+          setPreviewPicture(photo)
+        }
+      }
+    }, [data])
 
     const onSubmit = (data: any) => {
       onNext({...data, photo: previewPicture})
@@ -113,7 +121,7 @@ const BasicInformationForm : React.FC<BasiInformationProps> = ({ onNext }) =>{
               {
                 showPicture ? 
                 <div className="flex  flex-col justify-center">
-                  <img src={previewPicture} alt="Selected" style={{ width: '300px', height: '300px', marginTop: "20px" }} />
+                  <img src={previewPicture} alt="Selected" style={picturePreviewCSS} />
                   
                   <button className="uppercase w-[33%] text-black rounded-md mt-8 border-red bg-red border-2 font-semibold text-[14px] py-4 px-6" onClick={() => {
                   setPreviewPicture({})

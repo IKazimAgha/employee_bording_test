@@ -23,15 +23,15 @@ const ConfirmationPage: React.FC<ConfirmationPageProps> = ({ data ,onConfirmatio
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-700">Organisation Name:</span>
-                        <span className="text-gray-800">{data.organisationName}</span>
+                        <span className="text-gray-800">{data.organizationName}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-700">Department:</span>
-                        <span className="text-gray-800">{data.department}</span>
+                        <span className="text-gray-800">{data.departName?.label}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-700">Division:</span>
-                        <span className="text-gray-800">{data.division}</span>
+                        <span className="text-gray-800">{data.divisionName?.label}</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-700">Give Student Their Own Login:</span>

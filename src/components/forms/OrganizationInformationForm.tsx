@@ -7,6 +7,7 @@ import {OrganisationSettingsFormProps} from "../../types/PagesTypes"
 import { defaultStyle, InputStyle } from "../../constants/customInputStyles";
 import {useOrganizationDataHook} from "../../hooks/useOrganizationDataHook.hooks"
 import Select from "react-select";
+import { isNotEmpty } from "../../constants/functionalLogics";
 
 const formDefaultValues = {
     organizationName: "",
@@ -14,8 +15,18 @@ const formDefaultValues = {
     divisionName: {}
   };
 
+  const defaultOptions = [
+    {
+      label: "Kazim",
+      value: "Agha",
+    },
+    {
+      label: "Systems",
+      value: "Limited",
+    }
+  ]
 
-const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ onNext, onPrevious }) => {
+const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ onNext, onPrevious, data }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { organisationLists, departments, divisions, handleOrganisationSearch, fetchDepartments, fetchDivisions } = useOrganizationDataHook(searchTerm);
   const [suggestions, setSuggestions] = useState<any>([]);
@@ -43,7 +54,11 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
         mode: "onChange",
         defaultValues: formDefaultValues,
       });
-  
+
+    useEffect(() => {
+      fetchDepartments("");
+      fetchDivisions("")
+    }, [])
     const onSubmit = (data: any) => {
       onNext({...data})
     }
@@ -57,19 +72,17 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
     };
 
     const handleSearchChangeDept = async (event: any) => {
-      const value = event.target.value;
-      setSearchTerm(value);
-      setValue("departName", value)
-      if(value.label.trim !== ""){
+      const value = event.value;
+      setValue("departName", event)
+      if(value.trim !== ""){
         handleOrganisationSearch(value)
       }
     };
 
     const handleSearchChangeDivision = async (event: any) => {
-      const value = event.target.value;
-      setSearchTerm(value);
-      setValue("divisionName", value)
-      if(value.label.trim !== ""){
+      const value = event.value;
+      setValue("divisionName", event)
+      if(value.trim !== ""){
         handleOrganisationSearch(value)
       }
     };
@@ -92,8 +105,8 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
         const array: any = []
         departments.map((item: any) => {
           array.push({
-            value: item?.departmentName,
-            key: item?.departmentKey
+            label: item?.departmentName,
+            value: item?.departmentKey
           })
         })
         setSuggestionsDept(array);
@@ -105,8 +118,8 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
         const array: any = []
         divisions.map((item: any) => {
           array.push({
-            value: item?.divisionName,
-            key: item?.divisionKey
+            label: item?.divisionName,
+            value: item?.divisionKey
           })
         })
         setSuggestionsDivision(array);
@@ -114,17 +127,20 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
     }, [departments])
 
     const handleSuggestionClick = (suggestion: any) => {
-      setSearchTerm(suggestion);
+      setSearchTerm(suggestion?.organisationName);
       setValue("organizationName", suggestion.organisationName)
       fetchDepartments(suggestion.organisationKey)
       setSuggestions([]);
     };
 
-    const handleSuggestionDeptClick = (suggestion: any) => {
-      setSearchTerm(suggestion);
-      setValue("organizationName", suggestion.organisationName)
-      setSuggestions([]);
-    };
+    useEffect(() => {
+      if(isNotEmpty(data)){
+        const { organizationName, divisionName, departName } = data;
+        setValue("organizationName", organizationName)
+        setValue("departName", departName)
+        setValue("divisionName", divisionName)
+      }
+    }, [data])
 
     return (
         <div className=" mx-auto p-6  shadow rounded-lg" >
@@ -173,7 +189,7 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
                   </div>
                 )}
               </div>
-              <div className="flex flex-col justify-start items-start w-[33%]">
+              <div className="flex flex-col justify-start items-start w-[50%]">
                 <label className="mt-6  text-tertiary-250 font-[500] md:text-[14px] md:leading-5">
                   Department
                 </label>
@@ -183,7 +199,7 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
                   rules={{ required: true }}
                   render={({ field: { onChange, name, value, ref } }: any) => (
                     <Select 
-                      options={suggestionsDept as any}
+                      options={getValues("organizationName") !== "" ? suggestionsDept as any : [{}]}
                       onChange={handleSearchChangeDept}
                       name={name}
                       value={value}
@@ -208,7 +224,7 @@ const OrganizationInformationForm: React.FC<OrganisationSettingsFormProps> = ({ 
                   rules={{ required: true }}
                   render={({ field: { onChange, name, value, ref } }: any) => (
                     <Select 
-                      options={suggestionsDivision as any}
+                      options={(getValues("departName") as any)?.label !== "" ? suggestionsDivision as any : []}
                       onChange={handleSearchChangeDivision}
                       name={name}
                       value={value}

@@ -1,56 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import InputFields from "../../constants/InputFields";
 import {EmployeeLoginPageProps} from "../../types/PagesTypes"
-
-const inputStyle = ` 
-    w-full
-    md:w-[325px]  
-    lg:w-[388px]  
-    xl:w-[388px]
-    px-4 
-    py-3 
-    mt-3 
-    my-1
-    border-lightShade2   
-    outline-bluerega   
-    rounded-md  
-    border   
-    focus:border-lightShade2 
-    bg-white
-    `;
-    const checkBoxInputStyle = ` 
-    w-full
-    md:w-[325px]  
-    lg:w-[388px]  
-    xl:w-[388px]
-    px-4 
-    py-3 
-    mt-6 
-    my-1
-    border-lightShade2   
-    outline-bluerega   
-    rounded-md  
-    border   
-    focus:border-lightShade2 
-    bg-white
-    `;
-
+import { isNotEmpty } from "../../constants/functionalLogics";
+import { checkBoxInputStyle, InputStyle } from "../../constants/customInputStyles";
 
 const formDefaultValues = {
-    giveLogin: "",
+    giveLogin: false,
     email: "",
   };
 
 
-const EmployeeLoginPage: React.FC<EmployeeLoginPageProps> = ({ onNext, onPrevious }) =>  {
-
-  const [isLoginGiven, setIsLoginGiven] = useState<boolean>(false)
+const EmployeeLoginPage: React.FC<EmployeeLoginPageProps> = ({ onNext, onPrevious, data }) =>  {
 
     const Schema = yup.object({
-        giveLogin: yup.string().nullable(),
+        giveLogin: yup.boolean().nullable(),
         email: yup.string().nullable()
       });
 
@@ -74,7 +39,13 @@ const EmployeeLoginPage: React.FC<EmployeeLoginPageProps> = ({ onNext, onPreviou
       onNext({...data})
     }
 
-    console.log("watching student checkbox", !!watch("giveLogin") === true)
+    useEffect(() => {
+      if(isNotEmpty(data)){
+        const {giveLogin, email} = data;
+        setValue("giveLogin", giveLogin)
+        setValue("email", email)
+      }
+    }, [data])
 
     return (
         <div className="mx-auto p-6  shadow rounded-lg" >
@@ -94,6 +65,7 @@ const EmployeeLoginPage: React.FC<EmployeeLoginPageProps> = ({ onNext, onPreviou
                         ref={ref}
                         type="checkbox"
                         name={name}
+                        checked={getValues("giveLogin") || false}
                         value={value}
                         onChange={onChange}
                         placeholder={""}
@@ -125,7 +97,7 @@ const EmployeeLoginPage: React.FC<EmployeeLoginPageProps> = ({ onNext, onPreviou
                             value={value}
                             onChange={onChange}
                             placeholder={""}
-                            className={inputStyle}
+                            className={InputStyle}
                         />
                       )}
                     />
